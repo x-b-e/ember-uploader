@@ -180,7 +180,7 @@ export default EmberObject.extend(Evented, {
     
     httpReq.open(method, url, true)
     
-    const ajaxSettings = get(this, 'ajaxSettings.headers')
+    const ajaxSettings = get(this, 'ajaxSettings')
     
     Object.keys(ajaxSettings).forEach((key) => {
       httpReq.setRequestHeader(key, ajaxSettings[key])
