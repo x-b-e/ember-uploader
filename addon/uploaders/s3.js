@@ -72,30 +72,19 @@ export default Uploader.extend({
     extra.type = file.type;
     extra.size = file.size;
 
-    const settings = assign(
-      {},
-      {
-        contentType: 'application/json',
-        dataType: 'json',
-        data: method.match(/get/i) ? extra : JSON.stringify(extra),
-        method,
-        url
-      },
-      signingAjaxSettings,
-    );
-
     set(this, 'isSigning', true);
 
-    return new Promise((resolve, reject) => {
-      settings.success = (json) => {
-        run(null, resolve, this.didSign(json));
-      };
-
-      settings.error = (jqXHR, responseText, errorThrown) => {
-        run(null, reject, this.didErrorOnSign(jqXHR, responseText, errorThrown));
-      };
-
-      fetch(settings);
+    return fetch(url, {
+      method,
+      headers: {
+        ...signingAjaxSettings.headers,
+        'Content-Type': 'application/json'
+      },
+      body: method.match(/get/i) ? extra : JSON.stringify(extra)
+    }).then((res) => {
+      return this.didSign(res)
+    }).catch((err) => {
+      return this.didErrorOnSign(err);
     });
   },
 
