@@ -1,6 +1,4 @@
 import { Promise } from 'rsvp';
-import $ from 'jquery';
-import { assign } from '@ember/polyfills';
 import Evented from '@ember/object/evented';
 import EmberObject, { set, get } from '@ember/object';
 import { run } from '@ember/runloop';
@@ -178,27 +176,17 @@ export default EmberObject.extend(Evented, {
    * object
    */
   ajax (url, data = {}, method = this.method) {
-    const ajaxSettings = assign(
-      {},
-      {
-        contentType: false,
-        processData: false,
-        xhr: () => {
-          const xhr = $.ajaxSettings.xhr();
-          xhr.upload.onprogress = (event) => {
-            this.didProgress(event);
-          };
-          this.one('isAborting', () => xhr.abort());
-          return xhr;
-        },
-        url,
-        data,
-        method
-      },
-      get(this, 'ajaxSettings')
-    );
-
-    return this.ajaxPromise(ajaxSettings);
+    const httpReq = new XMLHttpRequest
+    
+    httpReq.open(method, url, true)
+    
+    const ajaxSettings = get(this, 'ajaxSettings.headers')
+    
+    Object.keys(ajaxSettings).forEach((key) => {
+      httpReq.setRequestHeader(key, ajaxSettings[key])
+    })
+    
+    return this.ajaxPromise(httpReq, data);
   },
 
   /**
@@ -208,17 +196,23 @@ export default EmberObject.extend(Evented, {
    * @param {object} settings The jQuery.ajax compatible settings object
    * @return {object} Returns a Ember.RSVP.Promise wrapping the ajax request
    */
-  ajaxPromise (settings) {
+  ajaxPromise (xhr, data) {
     return new Promise((resolve, reject) => {
-      settings.success = (data) => {
-        run(null, resolve, this.didUpload(data));
+      xhr.upload.addEventListener("progress", function(evt) {
+        this.didProgress(evt)
+      })
+      this.one('isAborting', () => xhr.abort());
+
+      xhr.onload = () => {
+        var json = xhr.response
+        run(null, resolve, this.didUpload(json));
       };
 
-      settings.error = (jqXHR, responseText, errorThrown) => {
+      xhr.onerror = (jqXHR, responseText, errorThrown) => {
         run(null, reject, this.didError(jqXHR, responseText, errorThrown));
       };
 
-      $.ajax(settings);
+      xhr.send(data)
     });
   }
 });

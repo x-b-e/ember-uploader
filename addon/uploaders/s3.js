@@ -1,6 +1,7 @@
 import { set, get } from '@ember/object';
 import Uploader from 'ember-uploader/uploaders/uploader';
 import { Promise } from 'rsvp';
+import { run } from '@ember/runloop';
 
 export default Uploader.extend({
   /**
@@ -75,7 +76,7 @@ export default Uploader.extend({
     const xhr = new XMLHttpRequest()
     xhr.open(method, url, true)
     xhr.setRequestHeader('Content-Type', 'application/json')
-    Object.keys(signingAjaxSettings).map((key) => {
+    Object.keys(signingAjaxSettings).forEach((key) => {
       xhr.setRequestHeader(key, signingAjaxSettings[key])
     })
 
