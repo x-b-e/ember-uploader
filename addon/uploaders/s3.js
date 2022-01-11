@@ -1,6 +1,6 @@
-//import { Promise } from 'rsvp';
+import { Promise } from 'rsvp';
 import { set, get } from '@ember/object';
-//import { run } from '@ember/runloop';
+import { run } from '@ember/runloop';
 import Uploader from 'ember-uploader/uploaders/uploader';
 import { assign } from '@ember/polyfills';
 
@@ -86,10 +86,16 @@ export default Uploader.extend({
 
     set(this, 'isSigning', true);
 
-    return fetch(settings).then((res) => {
-      return this.didSign(res)
-    }).catch((err) => {
-      return this.didErrorOnSign(err);
+    return new Promise((resolve, reject) => {
+      settings.success = (json) => {
+        run(null, resolve, this.didSign(json));
+      };
+
+      settings.error = (jqXHR, responseText, errorThrown) => {
+        run(null, reject, this.didErrorOnSign(jqXHR, responseText, errorThrown));
+      };
+
+      fetch(settings);
     });
   },
 
