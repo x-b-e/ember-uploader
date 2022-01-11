@@ -206,7 +206,8 @@ export default EmberObject.extend(Evented, {
       this.one('isAborting', () => xhr.abort());
 
       xhr.onload = () => {
-        run(null, resolve, this.didUpload(xhr.responseXML));
+        const response = xhr.responseXML ? xhr.responseXML : xhr.response
+        run(null, resolve, this.didUpload(response));
       };
 
       xhr.onerror = (jqXHR, responseText, errorThrown) => {
