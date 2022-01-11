@@ -84,7 +84,7 @@ export default Uploader.extend({
 
     return new Promise((resolve, reject) => {
       xhr.onload = () => {
-        var json = xhr.response
+        var json = JSON.parse(xhr.responseText)
         run(null, resolve, this.didSign(json));
       };
 

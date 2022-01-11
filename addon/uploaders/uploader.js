@@ -180,11 +180,11 @@ export default EmberObject.extend(Evented, {
     
     httpReq.open(method, url, true)
     
-    /*const ajaxSettings = get(this, 'ajaxSettings')
+    const ajaxSettings = get(this, 'ajaxSettings')
     
     Object.keys(ajaxSettings).forEach((key) => {
       httpReq.setRequestHeader(key, ajaxSettings[key])
-    })*/
+    })
     
     return this.ajaxPromise(httpReq, data);
   },
@@ -204,7 +204,7 @@ export default EmberObject.extend(Evented, {
       this.one('isAborting', () => xhr.abort());
 
       xhr.onload = () => {
-        var json = xhr.response
+        var json = JSON.parse(xhr.responseText)
         run(null, resolve, this.didUpload(json));
       };
 
