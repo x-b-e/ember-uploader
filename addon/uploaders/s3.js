@@ -1,8 +1,6 @@
-import { Promise } from 'rsvp';
 import { set, get } from '@ember/object';
-import { run } from '@ember/runloop';
 import Uploader from 'ember-uploader/uploaders/uploader';
-import { assign } from '@ember/polyfills';
+import { Promise } from 'rsvp';
 
 export default Uploader.extend({
   /**
@@ -66,25 +64,34 @@ export default Uploader.extend({
   sign(file, extra = {}) {
     const url    = get(this, 'signingUrl');
     const method = get(this, 'signingMethod');
-    const signingAjaxSettings = get(this, 'signingAjaxSettings');
+    const signingAjaxSettings = get(this, 'signingAjaxSettings.headers');
 
     extra.name = file.name;
     extra.type = file.type;
     extra.size = file.size;
 
+    const data = method.match(/get/i) ? extra : JSON.stringify(extra)
+
+    const xhr = new XMLHttpRequest()
+    xhr.open(method, url, true)
+    xhr.setRequestHeader('Content-Type', 'application/json')
+    Object.keys(signingAjaxSettings).map((key) => {
+      xhr.setRequestHeader(key, signingAjaxSettings[key])
+    })
+
     set(this, 'isSigning', true);
 
-    return fetch(url, {
-      method,
-      headers: {
-        ...signingAjaxSettings.headers,
-        'Content-Type': 'application/json'
-      },
-      body: method.match(/get/i) ? extra : JSON.stringify(extra)
-    }).then((res) => {
-      return this.didSign(res)
-    }).catch((err) => {
-      return this.didErrorOnSign(err);
+    return new Promise((resolve, reject) => {
+      xhr.onload = () => {
+        var json = xhr.response
+        run(null, resolve, this.didSign(json));
+      };
+
+      xhr.onerror = (jqXHR, responseText, errorThrown) => {
+        run(null, reject, this.didErrorOnSign(jqXHR, responseText, errorThrown));
+      };
+
+      xhr.send(data)
     });
   },
 
