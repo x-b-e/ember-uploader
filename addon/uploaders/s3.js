@@ -85,18 +85,17 @@ export default Uploader.extend({
 
     set(this, 'isSigning', true);
 
-    return new Promise((resolve, reject) => {
-      fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: method.match(/get/i) ? extra : JSON.stringify(extra)
-      }).then((res) => {
-        run(null, resolve, this.didSign(res.data));
-      }).catch((err) => {
-        run(null, reject, this.didErrorOnSign(err));
-      })
+    return fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: method.match(/get/i) ? extra : JSON.stringify(extra)
+    }).then((res) => {
+      return this.didSign(res);
+    }).catch((err) => {
+      console.log("err", err)
+      return this.didErrorOnSign(err);
     });
   },
 
