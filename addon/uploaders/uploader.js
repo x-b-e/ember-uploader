@@ -198,14 +198,13 @@ export default EmberObject.extend(Evented, {
    */
   ajaxPromise (xhr, data) {
     return new Promise((resolve, reject) => {
-      xhr.upload.addEventListener("progress", function(evt) {
+      xhr.upload.onprogress = (evt) => {
         this.didProgress(evt)
-      })
+      }
       this.one('isAborting', () => xhr.abort());
 
       xhr.onload = () => {
-        var json = JSON.parse(xhr.responseText)
-        run(null, resolve, this.didUpload(json));
+        run(null, resolve, this.didUpload(xhr.response));
       };
 
       xhr.onerror = (jqXHR, responseText, errorThrown) => {
