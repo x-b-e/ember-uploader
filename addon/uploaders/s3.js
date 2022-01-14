@@ -85,7 +85,7 @@ export default Uploader.extend({
     }
     
     if (withCredentials) {
-      httpReq.withCredentials = true
+      xhr.withCredentials = true
     }
 
     set(this, 'isSigning', true);
