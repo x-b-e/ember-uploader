@@ -41,6 +41,8 @@ export default EmberObject.extend(Evented, {
    */
   isUploading: false,
 
+  withCredentials: false,
+
   /**
    * Start upload of file(s) and any extra data
    *
