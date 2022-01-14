@@ -66,6 +66,7 @@ export default Uploader.extend({
     const url    = get(this, 'signingUrl');
     const method = get(this, 'signingMethod');
     const signingAjaxSettings = get(this, 'signingAjaxSettings.headers');
+    const withCredentials = get(this, 'withCredentials')
 
     extra.name = file.name;
     extra.type = file.type;
@@ -76,9 +77,16 @@ export default Uploader.extend({
     const xhr = new XMLHttpRequest()
     xhr.open(method, url, true)
     xhr.setRequestHeader('Content-Type', 'application/json')
-    Object.keys(signingAjaxSettings).forEach((key) => {
-      xhr.setRequestHeader(key, signingAjaxSettings[key])
-    })
+    
+    if (signingAjaxSettings) {
+      Object.keys(signingAjaxSettings).forEach((key) => {
+        xhr.setRequestHeader(key, signingAjaxSettings[key])
+      })
+    }
+    
+    if (withCredentials) {
+      httpReq.withCredentials = true
+    }
 
     set(this, 'isSigning', true);
 

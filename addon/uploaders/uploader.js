@@ -176,11 +176,16 @@ export default EmberObject.extend(Evented, {
    * object
    */
   ajax (url, data = {}, method = this.method) {
-    const httpReq = new XMLHttpRequest
+    const httpReq = new XMLHttpRequest()
     
     httpReq.open(method, url, true)
     
     const ajaxSettings = get(this, 'ajaxSettings.headers')
+    const withCredentials = get(this, 'withCredentials')
+
+    if (withCredentials) {
+      httpReq.withCredentials = true
+    }
     
     if (ajaxSettings) {
       Object.keys(ajaxSettings).forEach((key) => {
